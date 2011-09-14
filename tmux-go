@@ -1,0 +1,36 @@
+#!/bin/bash
+###########################################################
+# Launch tmux pre-configured for rails development
+# * will also attach to existing session if it exists
+###########################################################
+
+if [ -z $1 ]; then
+	echo "Please give the tmux session name as the first argument"
+	exit 1;
+fi
+
+SESSION=$1
+
+# if session is already running, just attach to it
+tmux has-session -t $SESSION
+if [ $? -eq 0 ]; then
+  echo "Session $SESSION already exists. Attaching..."
+  sleep 1
+  tmux -2 attach -t $SESSION
+  exit 0;
+fi
+
+# create a new session and detach from it
+tmux -2 new-session -d -s $SESSION
+tmux set-option -t $SESSION -g set-remain-on-exit on
+# tmux set-window-option -t $SESSION -g automatic-rename off
+
+tmux new-window -k -t $SESSION:2 -n vim
+tmux new-window -k -t $SESSION:3 -n console
+tmux new-window -k -t $SESSION:8 -n guard
+tmux new-window -k -t $SESSION:9 -n server
+
+
+# all done.  select starting window and get to work
+tmux select-window -t $SESSION:1
+tmux -2 attach -t $SESSION
